@@ -251,7 +251,7 @@ class DynamicCachedFonts {
   ///
   /// This method can be called in `main()`, `initState()` or on button tap/click
   /// as needed.
-  Future<Iterable<FileInfo>> load() async {
+  Stream<dynamic> load() async* {
     if (_loaded) throw StateError('Font has already been loaded');
     _loaded = true;
 
@@ -286,7 +286,7 @@ class DynamicCachedFonts {
       devLog(<String>['Font is not in cache.', 'Loading font now...']);
 
       for (final String url in downloadUrls)
-        await cacheFont(
+        yield* cacheFont(
           url,
           cacheStalePeriod: cacheStalePeriod,
           maxCacheObjects: maxCacheObjects,
@@ -298,7 +298,7 @@ class DynamicCachedFonts {
       );
     }
 
-    return fontFiles;
+    yield fontFiles;
   }
 
   /// Accepts [cacheManager] and [force] to provide a custom [CacheManager] for testing.
@@ -353,16 +353,17 @@ class DynamicCachedFonts {
   ///
   ///   It is used to specify the cache configuration, [Config],
   ///   for [CacheManager].
-  static Future<FileInfo> cacheFont(
+  Stream<dynamic> cacheFont(
     String url, {
     Duration cacheStalePeriod = kDefaultCacheStalePeriod,
     int maxCacheObjects = kDefaultMaxCacheObjects,
-  }) =>
-      RawDynamicCachedFonts.cacheFont(
-        url,
-        cacheStalePeriod: cacheStalePeriod,
-        maxCacheObjects: maxCacheObjects,
-      );
+  }) async* {
+    yield* RawDynamicCachedFonts.cacheFont(
+      url,
+      cacheStalePeriod: cacheStalePeriod,
+      maxCacheObjects: maxCacheObjects,
+    );
+  }
 
   /// Checks whether the given [url] can be loaded directly from cache.
   ///
